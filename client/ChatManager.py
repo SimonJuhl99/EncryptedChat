@@ -14,6 +14,26 @@ class ChatManager:
         self.Port = port
         self.server.connect((self.IP_address, self.Port))
 
+    def first_fetch(self):
+        # get all group objects from database
+        pass
+
+    def handle_message(self, text, group_id):
+        # send text to all users in the group with group_id
+        pass
+
+    def create_group(self):
+        pass
+
+    def join_group(self, invite_code):
+        pass
+
+    def leave_group(self, group_id):
+        pass
+
+    def authenticate():
+        pass
+
     def run(self):
         while True:
             # maintains a list of possible input streams
@@ -37,10 +57,7 @@ class ChatManager:
                 else:
                     message = bytes(sys.stdin.readline(), 'utf-8')
                     self.server.send(message)
-                    #print('Sendt noget til server:')
-                    # sys.stdout.write("<You>")
-                    # sys.stdout.write(message.decode('utf-8'))
-                    # sys.stdout.flush()
+
 
         server.close()
 
