@@ -1,3 +1,4 @@
+from cryptography.fernet import Fernet
 
 class Group:
 
@@ -7,9 +8,12 @@ class Group:
         self.messages = messages
         self.group_members = group_members
         self.admin = admin
+        self.chat_key = Fernet.generate_key()
 
     def create_invite(self):
         pass
 
     def ban_user(self, user_alias):
         pass
+
+    
