@@ -2,17 +2,35 @@
 import socket
 import select
 import sys
+# from _thread import *
+import threading
+import argparse
+import GUI
+
+# sep = chr(31)
+sep = "chr(31)"
 
 class ChatManager:
 
-    def __init__(self, ip, port):
+    def __init__(self):
+
+        # Argument Parsing Setup
+        parser = argparse.ArgumentParser()
+        parser.add_argument('-ip', type=str, required=False)
+        parser.add_argument('-port', type=int, required=False)
+        args = parser.parse_args()
+        self.IP_address = str(args.ip) if args.ip else "127.0.0.1"
+        self.Port = int(args.port) if args.port else 9000
+
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        if len(sys.argv) != 3:
-            print ("Correct usage: script, IP address, port number")
-            exit()
-        self.IP_address = ip
-        self.Port = port
         self.server.connect((self.IP_address, self.Port))
+
+    def start_thread(self):
+        # new_thread = threading.Thread(name="GUI Thread", target=gui.mainloop, args=())
+        new_thread = threading.Thread(name="ChatManager Thread", target=cm.run, args=())
+        new_thread.start()
+        return new_thread
+
 
     def first_fetch(self):
         # get all group objects from database
@@ -54,6 +72,10 @@ class ChatManager:
                     message = socks.recv(2048)
                     # print('Modtaget noget fra server:')
                     print (message.decode('utf-8'))
+                    # gui.chat_window.delete(0, END)
+                    global gui
+                    print("GUI objekt inde i CM indeholder...")
+                    dir(gui)
                 else:
                     message = bytes(sys.stdin.readline(), 'utf-8')
                     self.server.send(message)
@@ -63,5 +85,17 @@ class ChatManager:
 
 
 if __name__ == "__main__":
-    cm = ChatManager(str(sys.argv[1]), int(sys.argv[2]))
-    cm.run()
+    # Initiate Objects
+    cm = ChatManager()
+    gui = GUI.HomeScreen("Nisse")
+
+    # thread = threading.Thread(name="GUI Thread", target=gui.mainloop(), args=())
+    # thread.start()
+    cm.start_thread()
+
+    # start_new_thread(gui.mainloop(), *args)
+    # start_new_thread(cm.run()) 
+
+
+    gui.mainloop()
+    # cm.run()
