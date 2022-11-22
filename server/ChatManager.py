@@ -1,3 +1,5 @@
+# https://www.positronx.io/create-socket-server-with-multiple-clients-in-python/
+
 import socket
 import os
 from _thread import *
@@ -26,13 +28,19 @@ def multi_threaded_client(connection):
         response = 'Server message: ' + data.decode('utf-8')
         if not data:
             break
-        connection.sendall(str.encode(response))
+
+        for i in clients:
+            i.sendall(str.encode(response))
+        #connection.sendall(str.encode(response))
     connection.close()
+
+clients = []
 
 while True:
     Client, address = ServerSideSocket.accept()
     print('Connected to: ' + address[0] + ':' + str(address[1]))
     start_new_thread(multi_threaded_client, (Client, ))
+    clients.append(Client)
     ThreadCount += 1
     print('Thread Number: ' + str(ThreadCount))
 

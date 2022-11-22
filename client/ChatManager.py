@@ -1,4 +1,5 @@
 import socket
+from _thread import *
 
 ClientMultiSocket = socket.socket()
 #host = '127.0.0.1'
@@ -13,10 +14,24 @@ except socket.error as e:
 
 res = ClientMultiSocket.recv(1024)
 
-while True:
-    Input = input('Hey there: ')
-    ClientMultiSocket.send(str.encode(Input))
-    res = ClientMultiSocket.recv(1024)
-    print(res.decode('utf-8'))
+def send_to_server(connection):
+    while True:
+        Input = input('Hey there: ')
+        connection.send(str.encode(Input))
+
+def recv_from_server(connection):
+    while True:
+        res = connection.recv(1024)
+        print(res.decode('utf-8'))
+
+# while True:
+#     Input = input('Hey there: ')
+#     ClientMultiSocket.send(str.encode(Input))
+#     res = ClientMultiSocket.recv(1024)
+#     print(res.decode('utf-8'))
+t1 = start_new_thread(send_to_server, (ClientMultiSocket, ))
+t2 = start_new_thread(recv_from_server, (ClientMultiSocket, ))
+
+
 
 ClientMultiSocket.close()
