@@ -1,37 +1,41 @@
+# Python program to implement client side of chat room.
 import socket
-from _thread import *
+import select
+import sys
 
-ClientMultiSocket = socket.socket()
-#host = '127.0.0.1'
-host = '192.168.1.105'
-port = 2004
-print('Waiting for connection response')
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+if len(sys.argv) != 3:
+    print ("Correct usage: script, IP address, port number")
+    exit()
+IP_address = str(sys.argv[1])
+Port = int(sys.argv[2])
+server.connect((IP_address, Port))
 
-try:
-    ClientMultiSocket.connect((host, port))
-except socket.error as e:
-    print(str(e))
+while True:
 
-res = ClientMultiSocket.recv(1024)
+    # maintains a list of possible input streams
+    sockets_list = [sys.stdin, server]
 
-def send_to_server(connection):
-    while True:
-        Input = input('Hey there: ')
-        connection.send(str.encode(Input))
+    """ There are two possible input situations. Either the
+    user wants to give manual input to send to other people,
+    or the server is sending a message to be printed on the
+    screen. Select returns from sockets_list, the stream that
+    is reader for input. So for example, if the server wants
+    to send a message, then the if condition will hold true
+    below.If the user wants to send a message, the else
+    condition will evaluate as true"""
+    read_sockets,write_socket, error_socket = select.select(sockets_list,[],[])
 
-def recv_from_server(connection):
-    while True:
-        res = connection.recv(1024)
-        print(res.decode('utf-8'))
-
-# while True:
-#     Input = input('Hey there: ')
-#     ClientMultiSocket.send(str.encode(Input))
-#     res = ClientMultiSocket.recv(1024)
-#     print(res.decode('utf-8'))
-t1 = start_new_thread(send_to_server, (ClientMultiSocket, ))
-t2 = start_new_thread(recv_from_server, (ClientMultiSocket, ))
-
-
-
-ClientMultiSocket.close()
+    for socks in read_sockets:
+        if socks == server:
+            message = socks.recv(2048)
+            print('Modtaget noget fra server:')
+            print (message.decode('utf-8'))
+        else:
+            message = bytes(sys.stdin.readline(), 'utf-8')
+            server.send(message)
+            print('Sendt noget til server:')
+            sys.stdout.write("<You>")
+            sys.stdout.write(message.decode('utf-8'))
+            sys.stdout.flush()
+server.close()
