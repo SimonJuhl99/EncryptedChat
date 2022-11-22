@@ -2,6 +2,7 @@
 import socket
 import select
 import sys
+import json
 
 class ChatManager:
 
@@ -34,6 +35,14 @@ class ChatManager:
     def authenticate():
         pass
 
+
+    def store_key(self, group_id, key):
+        """Store symmetric key for group locally """
+        with open(".data.json", "r+") as file:
+            info = json.load(file)
+            info["Groups"].append(f"\"{group_id}\":\"{key}\"")
+            json.dump(info, file)
+    
     def run(self):
         while True:
             # maintains a list of possible input streams
