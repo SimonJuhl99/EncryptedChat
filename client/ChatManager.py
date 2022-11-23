@@ -5,29 +5,29 @@ import sys
 # from _thread import *
 import threading
 import argparse
-import GUI
+#import GUI
 
 # sep = chr(31)
 sep = "chr(31)"
 
 class ChatManager:
 
-    def __init__(self):
+    def __init__(self,ip,port):
 
         # Argument Parsing Setup
-        parser = argparse.ArgumentParser()
+        """parser = argparse.ArgumentParser()
         parser.add_argument('-ip', type=str, required=False)
         parser.add_argument('-port', type=int, required=False)
-        args = parser.parse_args()
-        self.IP_address = str(args.ip) if args.ip else "127.0.0.1"
-        self.Port = int(args.port) if args.port else 9000
+        args = parser.parse_args()"""
+        self.IP_address = str(ip) if ip else "127.0.0.1"
+        self.Port = int(port) if port else 9000
 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.connect((self.IP_address, self.Port))
 
     def start_thread(self):
         # new_thread = threading.Thread(name="GUI Thread", target=gui.mainloop, args=())
-        new_thread = threading.Thread(name="ChatManager Thread", target=cm.run, args=())
+        new_thread = threading.Thread(name="ChatManager Thread", target=self.run, args=())
         new_thread.start()
         return new_thread
 
@@ -84,7 +84,7 @@ class ChatManager:
         server.close()
 
 
-if __name__ == "__main__":
+"""if __name__ == "__main__":
     # Initiate Objects
     cm = ChatManager()
     gui = GUI.HomeScreen("Nisse")
@@ -98,4 +98,4 @@ if __name__ == "__main__":
 
 
     gui.mainloop()
-    # cm.run()
+    # cm.run()"""

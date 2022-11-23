@@ -4,6 +4,8 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import *
+import argparse
+import ChatManager
 
 class GroupName():
     def __init__(self, group_name):
@@ -85,7 +87,15 @@ class HomeScreen(tk.Tk):
 
 if __name__=="__main__":
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-ip', type=str, required=False)
+    parser.add_argument('-port', type=int, required=False)
+    args = parser.parse_args()
+
+
     chat_window = HomeScreen("Secret Service")
+    cm = ChatManager.ChatManager(args.ip,args.port)
+    cm.start_thread()
     chat_window.mainloop()
 
 
