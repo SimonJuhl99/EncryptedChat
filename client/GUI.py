@@ -17,6 +17,7 @@ class GroupName():
 class HomeScreen(tk.Tk):
     def __init__(self, group_name):
         super().__init__()
+        self.cm = ChatManager.ChatManager(args.ip,args.port,self)
         self.active_group = None
         self.geometry("1000x550")
         self.resizable(0,0)
@@ -65,29 +66,33 @@ class HomeScreen(tk.Tk):
         self.input_entry = Entry(self.frame5, text=self.input_user)
         self.input_entry.pack(side=TOP,fill=X)
 
+        self.input_entry.bind("<Return>", self.send_msg)
+        self.mylist.bind("<<ListboxSelect>>",self.trigger) #binding mylist widget to the trigger event
 
-        def send_msg(event):
-            input_get = self.input_entry.get()
-            my_message = "Me: " + input_get
-            self.chat_window.insert(INSERT, '%s\n' % my_message)
-            self.input_user.set('')
-            cm.handle_message(input_get,self.active_group,usr.get_alias())
-            return "break"
-        
-        self.input_entry.bind("<Return>", send_msg)
+    #def recv_msg(self,data):
+    #    print(data)
 
-        def trigger(event):
-            selection = event.widget.curselection()
-            if selection:
-                index = selection[0]
-                data = event.widget.get(index)
-                self.title_label.configure(text=data)
-                self.chat_window.configure()
-                self.chat_window.delete(1.0,tk.END)
-            else:
-                self.title_label.configure(text="Error")
+    def send_msg(self, event):
+        input_get = self.input_entry.get()
+        my_message = "Me: " + input_get
+        self.chat_window.insert(INSERT, '%s\n' % my_message)
+        self.input_user.set('')
+        self.cm.handle_message(input_get,self.active_group,usr.get_alias())
+        return "break"
+    
 
-        self.mylist.bind("<<ListboxSelect>>",trigger) #binding mylist widget to the trigger event
+    def trigger(self, event):
+        selection = event.widget.curselection()
+        if selection:
+            index = selection[0]
+            data = event.widget.get(index)
+            self.title_label.configure(text=data)
+            self.chat_window.configure()
+            self.chat_window.delete(1.0,tk.END)
+        else:
+            self.title_label.configure(text="Error")
+
+    
         
     def advanced_options(self):
         #empty for now
@@ -111,9 +116,9 @@ if __name__=="__main__":
 
 
     chat_window = HomeScreen("Secret Service")
-    cm = ChatManager.ChatManager(args.ip,args.port)
-    usr = User.User(10224892379847824, "Simon", "hej1234")
-    cm.start_thread()
+    #cm = ChatManager.ChatManager(args.ip,args.port,self)
+    usr = User.User(10224892379847824, "Løg", "hej1234")
+    chat_window.cm.start_thread()
     chat_window.mainloop()
 
 

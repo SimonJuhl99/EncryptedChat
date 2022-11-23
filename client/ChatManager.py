@@ -5,20 +5,21 @@ import sys
 # from _thread import *
 import threading
 import argparse
-#import GUI
+import GUI
 
 # sep = chr(31)
 sep = "chr(31)"
 
 class ChatManager:
 
-    def __init__(self,ip,port):
+    def __init__(self,ip,port,parent=None):
 
         # Argument Parsing Setup
         """parser = argparse.ArgumentParser()
         parser.add_argument('-ip', type=str, required=False)
         parser.add_argument('-port', type=int, required=False)
         args = parser.parse_args()"""
+        self.parent = parent
         self.IP_address = str(ip) if ip else "127.0.0.1"
         self.Port = int(port) if port else 9000
 
@@ -39,6 +40,14 @@ class ChatManager:
     def handle_message(self, text, group_id, alias):
         # send text to all users in the group with group_id
         self.server.send(bytes(text + ":" + group_id + ":" + alias, 'utf-8'))
+        pass
+    
+    def recv(self):
+        while True:
+            data = self.server.recv(2048)
+            if data:
+                self.parent.recv_msg(data)
+
         pass
 
     def create_group(self):
@@ -73,6 +82,8 @@ class ChatManager:
                     message = socks.recv(2048)
                     # print('Modtaget noget fra server:')
                     print (message.decode('utf-8'))
+                    
+
                     # gui.chat_window.delete(0, END)
                     #global gui
                     #print("GUI objekt inde i CM indeholder...")
@@ -83,6 +94,8 @@ class ChatManager:
 
 
         server.close()
+
+
 
 
 """if __name__ == "__main__":
