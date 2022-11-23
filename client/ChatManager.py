@@ -36,8 +36,9 @@ class ChatManager:
         # get all group objects from database
         pass
 
-    def handle_message(self, text, group_id):
+    def handle_message(self, text, group_id, alias):
         # send text to all users in the group with group_id
+        self.server.send(bytes(text + ":" + group_id + ":" + alias, 'utf-8'))
         pass
 
     def create_group(self):
@@ -73,9 +74,9 @@ class ChatManager:
                     # print('Modtaget noget fra server:')
                     print (message.decode('utf-8'))
                     # gui.chat_window.delete(0, END)
-                    global gui
-                    print("GUI objekt inde i CM indeholder...")
-                    dir(gui)
+                    #global gui
+                    #print("GUI objekt inde i CM indeholder...")
+                    #dir(gui)
                 else:
                     message = bytes(sys.stdin.readline(), 'utf-8')
                     self.server.send(message)

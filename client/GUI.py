@@ -6,6 +6,8 @@ from tkinter import messagebox
 from tkinter import *
 import argparse
 import ChatManager
+import User
+
 
 class GroupName():
     def __init__(self, group_name):
@@ -15,7 +17,8 @@ class GroupName():
 class HomeScreen(tk.Tk):
     def __init__(self, group_name):
         super().__init__()
-        self.geometry("850x450")
+        self.active_group = None
+        self.geometry("1000x550")
         self.resizable(0,0)
         self.group = GroupName(group_name)
         self.title("Encrypted Chat")
@@ -44,6 +47,12 @@ class HomeScreen(tk.Tk):
 
         for line in range(1,101):
             self.mylist.insert(END,"Group"+ str(line))
+
+        first_list_item_tuple = self.mylist.get(0, 0)                   # we retrieve the first element of the ListBox "mylist"
+        for first_list_item in first_list_item_tuple:
+            first_group_name = first_list_item.split(" ")[0]            # we retrieve the groupname from that element
+
+        self.set_active_group(first_group_name)
         self.mylist.grid(row=1,column=0,ipady=50,sticky=tk.NW)
         self.scrollbar.config(command=self.mylist.yview)
 
@@ -58,10 +67,11 @@ class HomeScreen(tk.Tk):
 
 
         def send_msg(event):
-            self.input_get = self.input_entry.get()
-            print(self.input_get)
-            self.chat_window.insert(INSERT, '%s\n' % self.input_get)
+            input_get = self.input_entry.get()
+            my_message = "Me: " + input_get
+            self.chat_window.insert(INSERT, '%s\n' % my_message)
             self.input_user.set('')
+            cm.handle_message(input_get,self.active_group,usr.get_alias())
             return "break"
         
         self.input_entry.bind("<Return>", send_msg)
@@ -82,6 +92,13 @@ class HomeScreen(tk.Tk):
     def advanced_options(self):
         #empty for now
         self.name() #doesn't work but needs to be there
+    
+    def set_active_group(self, group_id):
+        self.active_group = group_id
+
+
+
+        
 
 
 
@@ -95,6 +112,7 @@ if __name__=="__main__":
 
     chat_window = HomeScreen("Secret Service")
     cm = ChatManager.ChatManager(args.ip,args.port)
+    usr = User.User(10224892379847824, "Simon", "hej1234")
     cm.start_thread()
     chat_window.mainloop()
 
