@@ -29,7 +29,7 @@ class ChatManager:
     IP_address = str(args.ip) if args.ip else "127.0.0.1"
 
     # takes Port argument from command prompt as port number, if any exists
-    Port = int(args.port) if args.port else 9000
+    Port = int(args.port) if args.port else 9001
 
 
 
@@ -53,6 +53,14 @@ class ChatManager:
 
     list_of_clients = []
 
+
+    def split_message(self, message):
+        packet = str(message.decode('utf8'))
+        list = packet.split("|")
+        payload = list[3]
+
+        return payload
+
     def clientthread(self, conn, addr):
 
         # sends a message to the client whose user object is conn
@@ -68,9 +76,15 @@ class ChatManager:
                         terminal"""
                         print ("<" + addr[0] + "> " + message.decode('utf-8'))
 
+                        packet= str(message.decode('utf-8'))
+                        list = packet.split("|")
+                        
+                        payload = self.split_message(message)
+                        
+
                         # Calls broadcast function to send message to all
                         # message_to_send = "<" + addr[0] + "> " + message
-                        message_to_send = "<" + addr[0] + "> " + message.decode('utf-8')
+                        message_to_send = "<" + addr[0] + "> " + payload
                         print('Message to send to other users:')
                         print(message_to_send)
                         self.broadcast(message_to_send, conn)

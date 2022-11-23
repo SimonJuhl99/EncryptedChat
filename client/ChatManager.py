@@ -9,6 +9,10 @@ import GUI
 
 # sep = chr(31)
 sep = "chr(31)"
+user_id = 1
+group_id = 42
+
+
 
 class ChatManager:
 
@@ -20,7 +24,7 @@ class ChatManager:
         parser.add_argument('-port', type=int, required=False)
         args = parser.parse_args()
         self.IP_address = str(args.ip) if args.ip else "127.0.0.1"
-        self.Port = int(args.port) if args.port else 9000
+        self.Port = int(args.port) if args.port else 9001
 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.connect((self.IP_address, self.Port))
@@ -52,6 +56,11 @@ class ChatManager:
     def authenticate():
         pass
 
+    def build_frame(self, payload, user_id, group_id):
+        Header = "0"+"|"+str(user_id)+"|"+str(group_id)+"|"
+        packet = bytes(Header + payload, 'utf-8')
+        return packet
+
     def run(self):
         while True:
             # maintains a list of possible input streams
@@ -77,8 +86,11 @@ class ChatManager:
                     print("GUI objekt inde i CM indeholder...")
                     dir(gui)
                 else:
-                    message = bytes(sys.stdin.readline(), 'utf-8')
-                    self.server.send(message)
+                    payload = sys.stdin.readline()
+                    #Header = "0"+"|"+str(user_id)+"|"+str(group_id)+"|"
+                    #packet = bytes(Header + payload, 'utf-8')
+                    packet = self.build_frame(payload, user_id, group_id)
+                    self.server.send(packet)
 
 
         server.close()
