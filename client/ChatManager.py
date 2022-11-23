@@ -1,8 +1,12 @@
 # Python program to implement client side of chat room.
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.fernet import Fernet
 import socket
 import select
 import sys
 import json
+import User
 
 class ChatManager:
 
@@ -32,10 +36,40 @@ class ChatManager:
     def leave_group(self, group_id):
         pass
 
-    def authenticate():
-        pass
+    def encrypt_msg(self, msg_text, group_id):
+        """Encrypt message with {group_id} secret key"""
+        with open(".data.json", "r") as file:
+            info = json.load(file)
+            enc_key = info[f"{group_id}"]
 
+        enc = Fernet(enc_key)
+        msg_text = enc.encrypt(bytes(msg_text, 'utf-8'))
+        return msg_text
 
+    def decrypt_msg(self, cipher_text, group_id):
+        """Decrypt message with {group_id} secret key"""
+        with open(".data.json", "r") as file:
+            info = json.load(file)
+            enc_key = info[f'{group_id}']
+
+        enc = Fernet(enc_key)
+        msg_text = enc.decrypt(cipher_text) # Will throw error if cipher_text is not bytes
+        return msg_text
+        
+    def authenticate(self, user):
+        """Sign message for server-side user verification"""
+        std_message = b'SuperHemmeligNisse'
+        user_signature = user.private_key.sign(
+            std_message,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+
+        # Add communication to Server
+    
     def store_key(self, group_id, key):
         """Store symmetric key for group locally """
         with open(".data.json", "r+") as file:
