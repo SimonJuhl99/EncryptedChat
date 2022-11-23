@@ -32,6 +32,8 @@ class ChatManager:
     Port = int(args.port) if args.port else 9000
 
 
+    print(f"Readied IP is: {IP_address}")
+    print(f"Readied Port is: {Port}")
 
     """
     binds the server to an entered IP address and at the

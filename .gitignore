@@ -1,0 +1,4 @@
+#######################################
+#  Dumme cache og settings filer...
+__pycache__/*
+.vscode/*
