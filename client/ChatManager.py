@@ -28,7 +28,8 @@ class ChatManager:
 
     def start_thread(self):
         # new_thread = threading.Thread(name="GUI Thread", target=gui.mainloop, args=())
-        new_thread = threading.Thread(name="ChatManager Thread", target=self.run, args=())
+        #new_thread = threading.Thread(name="ChatManager Thread", target=self.run, args=())
+        new_thread = threading.Thread(name="ChatManager Thread", target=self.recv, args=())
         new_thread.start()
         return new_thread
 
@@ -43,12 +44,25 @@ class ChatManager:
         pass
     
     def recv(self):
-        while True:
-            data = self.server.recv(2048)
-            if data:
-                self.parent.recv_msg(data)
+        # while True:
+        #     data = self.server.recv(2048)
+        #     if data:
+        #         print("yaaaaaaaaaaaaaa")
+        #         self.parent.recv_msg(data)
 
-        pass
+        while True:
+            # maintains a list of possible input streams
+            sockets_list = [sys.stdin, self.server]
+
+            read_sockets, write_socket, error_socket = select.select(sockets_list,[],[])
+
+            for socks in read_sockets:
+                if socks == self.server:
+                    message = socks.recv(2048)
+                    # print('Modtaget noget fra server:')
+                    self.parent.recv_msg(message)
+                    print (message.decode('utf-8'))
+
 
     def create_group(self):
         pass

@@ -69,8 +69,8 @@ class HomeScreen(tk.Tk):
         self.input_entry.bind("<Return>", self.send_msg)
         self.mylist.bind("<<ListboxSelect>>",self.trigger) #binding mylist widget to the trigger event
 
-    #def recv_msg(self,data):
-    #    print(data)
+    def recv_msg(self,data):
+        print(data.decode('utf-8'))
 
     def send_msg(self, event):
         input_get = self.input_entry.get()
