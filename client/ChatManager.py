@@ -69,7 +69,41 @@ class ChatManager:
         )
 
         # Add communication to Server
-    
+
+
+    def share_group_secret(self, group_key, public_key):
+        """Share group secret with a specific user
+
+        Attributes:
+            group_key -- The groups symmetric key used to encrypt and decrypt messages
+            public_key -- The invited users public key used to encrypt group_key
+        """
+
+        cipher_text = public_key.encrypt(
+            group_key,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+
+        return cipher_text
+
+    def decrypt_group_secret(self, user, cipher_text):
+        """Decrypt shared group secret for access to group chat"""
+
+        group_key = user.private_key.decrypt(
+            cipher_text,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+        
+        return group_key
+
     def store_key(self, group_id, key):
         """Store symmetric key for group locally """
         with open(".data.json", "r+") as file:
