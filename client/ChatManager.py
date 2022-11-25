@@ -1,7 +1,12 @@
 # Python program to implement client side of chat room.
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.fernet import Fernet
 import socket
 import select
 import sys
+import json
+import User
 # from _thread import *
 import threading
 import argparse
@@ -37,15 +42,18 @@ class ChatManager:
         # get all group objects from database
         pass
 
-    def handle_message(self, payload, alias, group_id):
+    def handle_message(self, text, group_id, alias):
         # send text to all users in the group with group_id
-        #self.server.send(bytes(text + ":" + group_id + ":" + alias, 'utf-8'))
-        Header = "0"+"|"+str(alias)+"|"+str(group_id)+"|"
-        packet = bytes(Header + payload, 'utf-8')
-        self.server.send(packet)
-
+        self.server.send(bytes(text + ":" + group_id + ":" + alias, 'utf-8'))
+        pass
 
     def recv(self):
+        # while True:
+        #     data = self.server.recv(2048)
+        #     if data:
+        #         print("yaaaaaaaaaaaaaa")
+        #         self.parent.recv_msg(data)
+
         while True:
             # maintains a list of possible input streams
             sockets_list = [sys.stdin, self.server]
@@ -68,9 +76,81 @@ class ChatManager:
     def leave_group(self, group_id):
         pass
 
-    def authenticate():
-        pass
+    def encrypt_msg(self, msg_text, group_id):
+        """Encrypt message with {group_id} secret key"""
+        with open(".data.json", "r") as file:
+            info = json.load(file)
+            enc_key = info[f"{group_id}"]
 
+        enc = Fernet(enc_key)
+        msg_text = enc.encrypt(bytes(msg_text, 'utf-8'))
+        return msg_text
+
+    def decrypt_msg(self, cipher_text, group_id):
+        """Decrypt message with {group_id} secret key"""
+        with open(".data.json", "r") as file:
+            info = json.load(file)
+            enc_key = info[f'{group_id}']
+
+        enc = Fernet(enc_key)
+        msg_text = enc.decrypt(cipher_text) # Will throw error if cipher_text is not bytes
+        return msg_text
+        
+    def authenticate(self, user):
+        """Sign message for server-side user verification"""
+        std_message = b'SuperHemmeligNisse'
+        user_signature = user.private_key.sign(
+            std_message,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+
+        # Add communication to Server
+
+
+    def share_group_secret(self, group_key, public_key):
+        """Share group secret with a specific user
+
+        Attributes:
+            group_key -- The groups symmetric key used to encrypt and decrypt messages
+            public_key -- The invited users public key used to encrypt group_key
+        """
+
+        cipher_text = public_key.encrypt(
+            group_key,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+
+        return cipher_text
+
+    def decrypt_group_secret(self, user, cipher_text):
+        """Decrypt shared group secret for access to group chat"""
+
+        group_key = user.private_key.decrypt(
+            cipher_text,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+        
+        return group_key
+
+    def store_key(self, group_id, key):
+        """Store symmetric key for group locally """
+        with open(".data.json", "r+") as file:
+            info = json.load(file)
+            info["Groups"].append(f"\"{group_id}\":\"{key}\"")
+            json.dump(info, file)
+    
     def build_frame(self, payload, user_id, group_id):
         Header = "0"+"|"+str(user_id)+"|"+str(group_id)+"|"
         packet = bytes(Header + payload, 'utf-8')
@@ -103,7 +183,6 @@ class ChatManager:
                     #packet = bytes(Header + payload, 'utf-8')
                     packet = self.build_frame(payload, user_id, group_id)
                     self.server.send(packet)
-
 
         server.close()
 
