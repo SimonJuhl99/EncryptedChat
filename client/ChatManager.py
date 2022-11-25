@@ -37,18 +37,15 @@ class ChatManager:
         # get all group objects from database
         pass
 
-    def handle_message(self, text, group_id, alias):
+    def handle_message(self, payload, alias, group_id):
         # send text to all users in the group with group_id
-        self.server.send(bytes(text + ":" + group_id + ":" + alias, 'utf-8'))
-        pass
+        #self.server.send(bytes(text + ":" + group_id + ":" + alias, 'utf-8'))
+        Header = "0"+"|"+str(alias)+"|"+str(group_id)+"|"
+        packet = bytes(Header + payload, 'utf-8')
+        self.server.send(packet, 'utf-8')
+
 
     def recv(self):
-        # while True:
-        #     data = self.server.recv(2048)
-        #     if data:
-        #         print("yaaaaaaaaaaaaaa")
-        #         self.parent.recv_msg(data)
-
         while True:
             # maintains a list of possible input streams
             sockets_list = [sys.stdin, self.server]

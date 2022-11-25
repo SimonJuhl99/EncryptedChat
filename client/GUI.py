@@ -84,7 +84,7 @@ class HomeScreen(tk.Tk):
         self.chat_window.insert(INSERT, '%s\n' % my_message)
         self.chat_window.config(state=DISABLED)
         self.input_user.set('')
-        self.cm.handle_message(input_get,self.active_group,usr.get_alias())
+        self.cm.handle_message(input_get, usr.get_alias(), self.active_group)
         return "break"
 
 

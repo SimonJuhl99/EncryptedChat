@@ -4,6 +4,7 @@ import select
 import sys
 from _thread import *
 import argparse
+from datetime import datetime
 
 # sep = chr(31)
 sep = "chr(31)"
@@ -55,13 +56,40 @@ class ChatManager:
 
     list_of_clients = []
 
+    def handle_incoming_msg(conn, alias, group_id, payload):
 
-    def split_message(self, message):
+        dt = datetime.now()             # time - human format
+        ts = datetime.timestamp(dt)     # time - computer format
+
+        # !!!!!!!!!! log to database
+
+        Header = "1"+"|"+str(alias)+"|"+str(group_id)+"|"
+        packet = bytes(Header + payload, 'utf-8')
+        self.broadcast(packet, conn)
+
+
+    def recv_and_sort(self, message, conn):
         packet = str(message.decode('utf8'))
         list = packet.split("|")
-        payload = list[3]
 
-        return payload
+        if list[0] == '0':
+            alias = list[1]
+            group_id = list[2]
+            payload = list[3]
+            handle_incoming_msg(conn, alias, group_id, payload)
+
+        elif list[0] == '2':
+            pass
+        elif list[0] == '3':
+            pass
+        elif list[0] == '4':
+            pass
+        elif list[0] == '5':
+            pass
+        elif list[0] == '6':
+            pass
+        elif list[0] == '7':
+            pass
 
     def clientthread(self, conn, addr):
 
@@ -78,19 +106,19 @@ class ChatManager:
                         terminal"""
                         print ("<" + addr[0] + "> " + message.decode('utf-8'))
 
-                        packet= str(message.decode('utf-8'))
-                        list = packet.split("|")
-                        
-                        payload = self.split_message(message)
-                        
+                        # packet= str(message.decode('utf-8'))
+                        # list = packet.split("|")
+
+                        self.recv_and_sort(message, conn)
+
 
                         # Calls broadcast function to send message to all
                         # message_to_send = "<" + addr[0] + "> " + message
-                        message_to_send = "<" + addr[0] + "> " + payload
-                        print('Message to send to other users:')
-                        print(message_to_send)
-                        self.broadcast(message_to_send, conn)
-                        print(f"Separator from ClientThread is: {sep}")
+                        #message_to_send = "<" + addr[0] + "> " + payload
+                        #print('Message to send to other users:')
+                        #print(message_to_send)
+                        #self.broadcast(message_to_send, conn)
+                        #print(f"Separator from ClientThread is: {sep}")
 
 
                     else:
