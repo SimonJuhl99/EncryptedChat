@@ -64,7 +64,8 @@ class ChatManager:
         # !!!!!!!!!! log to database
 
         Header = "1"+"|"+str(alias)+"|"+str(group_id)+"|"
-        packet = bytes(Header + payload, 'utf-8')
+        packet = bytes(Header + payload + "|" + str(dt), 'utf-8')
+        print("Broadcasted message: " + str(packet))
         self.broadcast(packet, conn)
 
 
