@@ -93,6 +93,7 @@ class HomeScreen(tk.Tk):
         if selection:
             index = selection[0]
             data = event.widget.get(index)
+            set_active_group(data)
             self.title_label.configure(text=data)
             self.chat_window.configure()
             self.chat_window.delete(1.0,tk.END)
