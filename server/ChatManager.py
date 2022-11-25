@@ -93,13 +93,13 @@ class ChatManager:
     clients who's object is not the same as the one sending
     the message """
     def broadcast(self, message, connection):
-        print("Clients to send to: ") 
+        print("Clients to send to: ")
         print(len(self.list_of_clients))
         print(f"Separator from Broadcast is: {sep}")
 
 
         for clients in self.list_of_clients:		# For everyone in the chat
-            if clients!=connection:			# Unless it's the sender themself
+            if clients != connection:			# Unless it's the sender themself
                 dir(clients)
                 # print(f'Message sent to client {clients}')
                 try:
@@ -109,8 +109,8 @@ class ChatManager:
                     clients.close()
 
                     # if the link is broken, we remove the client
-                    remove(clients)
-                    
+                    self.remove(clients)
+
         print(f"Separator from Broadcast is: {sep}")
 
 
@@ -140,7 +140,7 @@ class ChatManager:
 
             # creates and individual thread for every user
             # that connects
-            start_new_thread(self.clientthread,(self.conn,addr))	
+            start_new_thread(self.clientthread,(self.conn,addr))
 
         conn.close()
         server.close()

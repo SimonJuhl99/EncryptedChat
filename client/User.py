@@ -13,7 +13,7 @@ class User:
             backend = default_backend()
         )
 
-        self.public_key = private_key.public_key()
+        self.public_key = self.private_key.public_key()
 
     def change_password(self, old_password, new_password):
         if (old_password == self.password):
@@ -23,4 +23,9 @@ class User:
 
     def change_alias(self, new_alias):
         self.alias = new_alias
+
+    def get_alias(self):
+        return(self.alias)
+    
+
 
