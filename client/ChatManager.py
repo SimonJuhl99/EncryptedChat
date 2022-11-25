@@ -14,11 +14,6 @@ class ChatManager:
 
     def __init__(self,ip,port,parent=None):
 
-        # Argument Parsing Setup
-        """parser = argparse.ArgumentParser()
-        parser.add_argument('-ip', type=str, required=False)
-        parser.add_argument('-port', type=int, required=False)
-        args = parser.parse_args()"""
         self.parent = parent
         self.IP_address = str(ip) if ip else "127.0.0.1"
         self.Port = int(port) if port else 9000
@@ -96,11 +91,6 @@ class ChatManager:
                     # print('Modtaget noget fra server:')
                     print (message.decode('utf-8'))
 
-
-                    # gui.chat_window.delete(0, END)
-                    # #global gui
-                    # #print("GUI objekt inde i CM indeholder...")
-                    # #dir(gui)
                 else:
                     message = bytes(sys.stdin.readline(), 'utf-8')
                     self.server.send(message)
@@ -111,18 +101,23 @@ class ChatManager:
 
 
 
-"""if __name__ == "__main__":
+if __name__ == "__main__":
+    # Argument Parsing Setup
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-ip', type=str, required=False)
+    parser.add_argument('-port', type=int, required=False)
+    args = parser.parse_args()
     # Initiate Objects
-    cm = ChatManager()
-    gui = GUI.HomeScreen("Nisse")
+    cm = ChatManager(args.ip, args.port)
+    # gui = GUI.HomeScreen("Nisse")
 
     # thread = threading.Thread(name="GUI Thread", target=gui.mainloop(), args=())
     # thread.start()
-    cm.start_thread()
+    # cm.start_thread()
 
     # start_new_thread(gui.mainloop(), *args)
     # start_new_thread(cm.run())
 
 
-    gui.mainloop()
-    # cm.run()"""
+    # gui.mainloop()
+    cm.run()
