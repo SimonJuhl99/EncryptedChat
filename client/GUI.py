@@ -61,6 +61,7 @@ class HomeScreen(tk.Tk):
         self.frame5.grid(row=1,column=2,ipady=50,sticky=tk.NW)
         self.chat_window = tk.Text(self.frame5)
         self.chat_window.pack(side=TOP)
+        self.chat_window.config(state=DISABLED)
 
         self.input_user = StringVar()
         self.input_entry = Entry(self.frame5, text=self.input_user)
@@ -72,12 +73,16 @@ class HomeScreen(tk.Tk):
     def recv_msg(self,data):
         print(data.decode('utf-8'))
         decoded_data = data.decode('utf-8')
+        self.chat_window.config(state=NORMAL)
         self.chat_window.insert(INSERT, '%s\n' % decoded_data)
+        self.chat_window.config(state=DISABLED)
 
     def send_msg(self, event):
         input_get = self.input_entry.get()
         my_message = "Me: " + input_get
+        self.chat_window.config(state=NORMAL)
         self.chat_window.insert(INSERT, '%s\n' % my_message)
+        self.chat_window.config(state=DISABLED)
         self.input_user.set('')
         self.cm.handle_message(input_get,self.active_group,usr.get_alias())
         return "break"
