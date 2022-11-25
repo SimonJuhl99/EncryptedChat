@@ -145,7 +145,7 @@ class ChatManager:
                 dir(clients)
                 # print(f'Message sent to client {clients}')
                 try:
-                    clients.send(bytes(message, 'utf-8'))
+                    clients.send(message)
                 except:
                     print("Didn't send to client " + clients)
                     clients.close()

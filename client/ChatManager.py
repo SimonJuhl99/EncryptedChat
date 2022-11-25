@@ -42,7 +42,6 @@ class ChatManager:
         #self.server.send(bytes(text + ":" + group_id + ":" + alias, 'utf-8'))
         Header = "0"+"|"+str(alias)+"|"+str(group_id)+"|"
         packet = bytes(Header + payload, 'utf-8')
-        print(type(packet))
         self.server.send(packet)
 
 
