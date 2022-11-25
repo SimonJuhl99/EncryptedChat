@@ -23,27 +23,50 @@ class Database():
         return d
 
 
-    def fetch(self, table, params, join=None):
+    # def fetch(self, table, params=None, join=None):
+    def fetch(self, table, setup = None):
+        # print(table)
+        # print(setup)
+
+        # Default fetch config
+        config = {'select': '*', 
+            'where': None,
+            'join': None}
+
+        # Replace defaults with set settings, if any exists
+        if setup:
+            config = dict(list(config.items()) + list(setup.items()))
+
+        # print(config)
+
         sql = f"""
-            SELECT * 
-            FROM '{table}'"""
+            SELECT {config['select']} 
+            FROM {table}"""
 
-        if join:
-            sql += f""" 
-            FULL OUTER JOIN '{join}' 
-            ON '{table}.user_id'='{join}.id'"""
+        if config['join']:
+            keys = list(config['join'].keys())
 
-        for i, field in enumerate(params):
-            if i>0:
-                sql += """ 
+            for i, key in enumerate(config['join']):
+                sql += f""" 
+            FULL OUTER JOIN {keys[i]} 
+            ON {config['join'][key]}"""
+
+
+        if config['where']:
+            for i, key in enumerate(config['where']):
+
+                if i>0:     # If not first column
+                    sql += """ 
             AND """
-            else:
-                sql += """
+
+                else:       # If first column
+                    sql += """
             WHERE """
-            sql += f"""{field}={params[field]}"""
+                
+                sql += f"""{key}={config['where'][key]}"""
 
 
-        print(f"SQL Statement is:\n{sql}")
+        print(f"SQL Statement is:\n{sql}\n\n")
         self.db.execute(sql)
         rows = self.db.fetchall()
         # rows = self.db.fetchone()
@@ -54,33 +77,37 @@ class Database():
 
         print(f"Fetched data is:")
         for row in rows:
-            # print(f"{row['id']} {row['name']} {row['price']}")
-            print(f"{row}\n")
-
-        # rows['user_id']
-        # print(rows.keys())
-        # print(rows)
-        # dir(rows)
-        # print(f"In fetch now from {table}")
+            print(f"{row}")
 
 
-    def fetch_group(self):
+    # Function to fetch group members
+    def fetch_group_members(self, group_id):
         print("Group fetching")
+        db_config = {'where': {'group_member.group_id': group_id},
+            'select': 'group_member.admin, user.alias',
+            'join':{'user': 'group_member.user_id=user.id'},
+            }
+        
+        self.fetch('group_member', db_config)
 
-
+    # Fetch your own user info
     def fetch_own_key(self, user_id):
-        params = {'id': user_id}
-        self.fetch('user', params)
+        db_config = {'where':{'id': user_id}}
+        self.fetch('user', db_config)
 
 
 
 
 if __name__ == "__main__":
     db = Database()
-    # params = {'user_id': 1, 'group_id': 1}
-    params = {'group_id': 1}
-    # db.fetch("group_member", params, "user")
-    # db.fetch("group_member", params)
-    # db.fetch_group()
+    db_config = {'where': {'group_id': 1}}
+    # db.fetch("group_member", db_config)
+
+    # db_config = {'user_id': 1, 'group_id': 1}
+    # db.fetch("group_member", db_config)
+
+    db.fetch('user')
+
+    db.fetch_group_members(1)
     db.fetch_own_key(3)
 
