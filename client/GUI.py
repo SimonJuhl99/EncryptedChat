@@ -29,7 +29,7 @@ class HomeScreen(tk.Tk):
             text=f'\n {self.group.group_name}'
         )
         self.title_label.pack(side=tk.TOP)                                 #Places title label in cneter
-        
+
         self.frame2 = tk.Frame(master=self, borderwidth=1)
         self.frame2.grid(row=0,column=0)
         self.group_label = tk.Label(self.frame2,
@@ -71,6 +71,8 @@ class HomeScreen(tk.Tk):
 
     def recv_msg(self,data):
         print(data.decode('utf-8'))
+        decoded_data = data.decode('utf-8')
+        self.chat_window.insert(INSERT, '%s\n' % decoded_data)
 
     def send_msg(self, event):
         input_get = self.input_entry.get()
@@ -79,7 +81,7 @@ class HomeScreen(tk.Tk):
         self.input_user.set('')
         self.cm.handle_message(input_get,self.active_group,usr.get_alias())
         return "break"
-    
+
 
     def trigger(self, event):
         selection = event.widget.curselection()
@@ -92,18 +94,18 @@ class HomeScreen(tk.Tk):
         else:
             self.title_label.configure(text="Error")
 
-    
-        
+
+
     def advanced_options(self):
         #empty for now
         self.name() #doesn't work but needs to be there
-    
+
     def set_active_group(self, group_id):
         self.active_group = group_id
 
 
 
-        
+
 
 
 
@@ -120,6 +122,3 @@ if __name__=="__main__":
     usr = User.User(10224892379847824, "Løg", "hej1234")
     chat_window.cm.start_thread()
     chat_window.mainloop()
-
-
-

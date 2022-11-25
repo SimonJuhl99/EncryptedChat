@@ -42,7 +42,7 @@ class ChatManager:
         # send text to all users in the group with group_id
         self.server.send(bytes(text + ":" + group_id + ":" + alias, 'utf-8'))
         pass
-    
+
     def recv(self):
         # while True:
         #     data = self.server.recv(2048)
@@ -61,7 +61,6 @@ class ChatManager:
                     message = socks.recv(2048)
                     # print('Modtaget noget fra server:')
                     self.parent.recv_msg(message)
-                    print (message.decode('utf-8'))
 
 
     def create_group(self):
@@ -96,7 +95,7 @@ class ChatManager:
                     message = socks.recv(2048)
                     # print('Modtaget noget fra server:')
                     print (message.decode('utf-8'))
-                    
+
 
                     # gui.chat_window.delete(0, END)
                     #global gui
@@ -122,7 +121,7 @@ class ChatManager:
     cm.start_thread()
 
     # start_new_thread(gui.mainloop(), *args)
-    # start_new_thread(cm.run()) 
+    # start_new_thread(cm.run())
 
 
     gui.mainloop()
