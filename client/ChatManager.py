@@ -9,6 +9,10 @@ import GUI
 
 # sep = chr(31)
 sep = "chr(31)"
+user_id = 1
+group_id = 42
+
+
 
 class ChatManager:
 
@@ -70,6 +74,11 @@ class ChatManager:
     def authenticate():
         pass
 
+    def build_frame(self, payload, user_id, group_id):
+        Header = "0"+"|"+str(user_id)+"|"+str(group_id)+"|"
+        packet = bytes(Header + payload, 'utf-8')
+        return packet
+
     def run(self):
         while True:
             # maintains a list of possible input streams
@@ -92,8 +101,11 @@ class ChatManager:
                     print (message.decode('utf-8'))
 
                 else:
-                    message = bytes(sys.stdin.readline(), 'utf-8')
-                    self.server.send(message)
+                    payload = sys.stdin.readline()
+                    #Header = "0"+"|"+str(user_id)+"|"+str(group_id)+"|"
+                    #packet = bytes(Header + payload, 'utf-8')
+                    packet = self.build_frame(payload, user_id, group_id)
+                    self.server.send(packet)
 
 
         server.close()
