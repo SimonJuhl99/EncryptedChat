@@ -82,7 +82,7 @@ class ChatManager:
                     else:
                         """message may have no content if the connection
                         is broken, in this case we remove the connection"""
-                        remove(conn)
+                        self.remove(conn)
 
                 except:
                     continue
@@ -118,7 +118,7 @@ class ChatManager:
     from the list that was created at the beginning of
     the program"""
     def remove(self, connection):
-        if connection in list_of_clients:
+        if connection in self.list_of_clients:
             self.list_of_clients.remove(connection)
 
 

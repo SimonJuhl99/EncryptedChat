@@ -73,9 +73,9 @@ class ChatManager:
                     # print('Modtaget noget fra server:')
                     print (message.decode('utf-8'))
                     # gui.chat_window.delete(0, END)
-                    global gui
-                    print("GUI objekt inde i CM indeholder...")
-                    dir(gui)
+                    # global gui
+                    # print("GUI objekt inde i CM indeholder...")
+                    # dir(gui)
                 else:
                     message = bytes(sys.stdin.readline(), 'utf-8')
                     self.server.send(message)
