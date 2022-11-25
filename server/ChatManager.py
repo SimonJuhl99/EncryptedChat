@@ -56,7 +56,7 @@ class ChatManager:
 
     list_of_clients = []
 
-    def handle_incoming_msg(conn, alias, group_id, payload):
+    def handle_incoming_msg(self, conn, alias, group_id, payload):
 
         dt = datetime.now()             # time - human format
         ts = datetime.timestamp(dt)     # time - computer format
@@ -76,7 +76,7 @@ class ChatManager:
             alias = list[1]
             group_id = list[2]
             payload = list[3]
-            handle_incoming_msg(conn, alias, group_id, payload)
+            self.handle_incoming_msg(conn, alias, group_id, payload)
 
         elif list[0] == '2':
             pass
