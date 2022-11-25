@@ -29,7 +29,7 @@ class ChatManager:
     IP_address = str(args.ip) if args.ip else "127.0.0.1"
 
     # takes Port argument from command prompt as port number, if any exists
-    Port = int(args.port) if args.port else 9001
+    Port = int(args.port) if args.port else 9000
 
 
     print(f"Readied IP is: {IP_address}")
