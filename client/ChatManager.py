@@ -46,6 +46,11 @@ class ChatManager:
 
         pass
 
+    def build_frame(self, payload, user_id, group_id):
+        Header = "0" + sep + str(user_id) + sep + str(group_id) + sep
+        packet = bytes(Header + payload, 'utf-8')
+        return packet
+
     # Receive function called from thread creation, both main() here and GUI
     def recv(self): 
         # while True:
@@ -182,10 +187,7 @@ class ChatManager:
             info["Groups"].append(f"\"{group_id}\":\"{key}\"")
             json.dump(info, file)
     
-    def build_frame(self, payload, user_id, group_id):
-        Header = "0" + sep + str(user_id) + sep + str(group_id) + sep
-        packet = bytes(Header + payload, 'utf-8')
-        return packet
+
 
     def run(self):
         while True:

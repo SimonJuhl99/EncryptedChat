@@ -37,49 +37,55 @@ class ChatManager:
         ts = datetime.timestamp(dt)     # time - computer format
         time = dt.strftime("%d/%m-%y %H:%M:%S")
 
+        # print(f"Time is: {time}")
+
         params = {
             'text': payload, 
             'user_id': user_id, 
             'group_id': group_id, 
             'timestamp': time
         }
+        # print("DB Params Done")
         db.insert('message', params)
+        # print("DB Logging Done")
         # db_config = {
         #     'where': {'id': user_id},
         #     'select': 'alias, ip',
         #     }
         # user = db.fetch('user', db_config)
         group = db.fetch_group_members(group_id)
+        # print("DB Group-fetching Done")
 
         # print(group)
         group_ips = []
         current = 0
-        print(f"\nIn Handle Message\nFetched data is:")
+        # print(f"\nIn Handle Message\nFetched data is:")
         for i, member in enumerate(group):
-            print(f"{member}")
+            group_ips.append(member['ip'])
+            # print(f"{member}")
             # print(f"Member ID is: {member['user_id']}")
             # print(f"Member Alias is: {member['alias']}")
             if str(member['user_id']) == str(user_id):
                 # print("User found")
                 current = i
-            else:
-                group_ips.append(member['ip'])
+            # else:
+            #     group_ips.append(member['ip'])
 
-        print(group_ips)
+        # print(group_ips)
         alias = group[current]['alias']
-        print(f"Alias is set to: {alias}")
+        # print(f"Alias is set to: {alias}")
         group.pop(current)
 
-        print(f"\nIn Handle Message\nFetched data is now:")
-        for i, member in enumerate(group):
-            print(f"Index {i} is: {member}")
+        # print(f"\nIn Handle Message\nFetched data is now:")
+        # for i, member in enumerate(group):
+        #     print(f"Index {i} is: {member}")
 
 
         # print("CM 49: Efter DB Insert")
         # print(user[0]['alias'])
-        print("Before Frame Generation")
+        # print("Before Frame Generation")
         frame = "1" + sep + alias + sep + str(group_id) + sep + payload + sep + str(time)
-        print("After Frame Generation")
+        # print("After Frame Generation")
         # print("CM 51: Efter Frame-creation")
         packet = bytes(frame, 'utf-8')
         # print("CM 51: Efter Frame-2-bytes")
@@ -91,12 +97,11 @@ class ChatManager:
     clients who's object is not the same as the one sending
     the message """
     def broadcast(self, message, connection, group_ips):
-        print("Inside Broadcast")
-        print("Clients to send to: ")
-        print(len(self.list_of_clients))
-        print(f"Separator from Broadcast is: {sep}")
+        # print("Inside Broadcast")
+        print(f"{len(group_ips)} Groupmembers to send to.")
+        # print(len(group_ips))
 
-
+        count = 0
         for client in self.list_of_clients:		# For everyone in the chat
             current_ip = client.getpeername()[0]
             # print(current_ip)
@@ -110,19 +115,26 @@ class ChatManager:
                 # print(f'Message sent to client {client}')
                 try:
                     client.send(message)
+                    count = count + 1
                 except:
                     print("Didn't send to client " + client)
                     client.close()
 
                     # if the link is broken, we remove the client
                     self.remove(client)
+            print(f"{count} Groupmembers were online.")
 
 
     def recv_and_sort(self, message, conn):
+        # print("Deciding Action")
         packet = str(message.decode('utf8'))
+        # print("Converted")
         list = packet.split(sep)
+        # print("Message Split")
+        # print(list)
 
         if list[0] == '0':
+            print("Handling Incoming Message")
             user_id = list[1]
             group_id = list[2]
             payload = list[3]

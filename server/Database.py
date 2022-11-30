@@ -28,6 +28,8 @@ class Database():
     #  --  General fetch function  --
     def fetch(self, table, setup = None):
         # print(setup)
+        # print("Inside DB Fetch")
+
 
         self.con = sqlite3.connect("database.db", detect_types=sqlite3.PARSE_COLNAMES | sqlite3.PARSE_DECLTYPES)    # Create connection to DB file
         self.con.row_factory = self.dict_factory
@@ -83,9 +85,9 @@ class Database():
     ####################################
     ###  --  Test Printing Area  -- 
 
-        print(f"Fetched data is:")
-        for row in rows:
-            print(f"{row}")
+        # print(f"Fetched data is:")
+        # for row in rows:
+        #     print(f"{row}")
 
         return rows
 
@@ -116,6 +118,7 @@ class Database():
     ######################################
     #  --  General fetch function  --
     def insert(self, table, params):
+        # print("Inside DB Insert")
 
         self.con = sqlite3.connect("database.db", detect_types=sqlite3.PARSE_COLNAMES | sqlite3.PARSE_DECLTYPES)    # Create connection to DB file
         self.con.row_factory = self.dict_factory
@@ -147,7 +150,7 @@ class Database():
         self.cur.execute(sql)
         self.con.commit()
 
-        print(f"Last Inserted Row is: {self.cur.lastrowid}")
+        print(f"Inserted at row in {table} table: {self.cur.lastrowid}")
 
         return self.cur.lastrowid
 
