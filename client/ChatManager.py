@@ -12,10 +12,10 @@ import threading
 import argparse
 import GUI
 
-# sep = chr(31)
-sep = "chr(31)"
-user_id = 1
-group_id = 42
+sep = chr(31)
+# sep = "|"
+user_id = 2
+group_id = 1
 
 
 
@@ -31,8 +31,6 @@ class ChatManager:
         self.server.connect((self.IP_address, self.Port))
 
     def start_thread(self):
-        # new_thread = threading.Thread(name="GUI Thread", target=gui.mainloop, args=())
-        #new_thread = threading.Thread(name="ChatManager Thread", target=self.run, args=())
         new_thread = threading.Thread(name="ChatManager Thread", target=self.recv, args=())
         new_thread.start()
         return new_thread
@@ -42,12 +40,14 @@ class ChatManager:
         # get all group objects from database
         pass
 
-    def handle_message(self, text, group_id, alias):
-        # send text to all users in the group with group_id
-        self.server.send(bytes(text + ":" + group_id + ":" + alias, 'utf-8'))
+    def handle_message(self, payload, group_id):
+        packet = self.build_frame(payload, user_id, group_id)
+        self.server.send(packet)
+
         pass
 
-    def recv(self):
+    # Receive function called from thread creation, both main() here and GUI
+    def recv(self): 
         # while True:
         #     data = self.server.recv(2048)
         #     if data:
@@ -64,7 +64,38 @@ class ChatManager:
                 if socks == self.server:
                     message = socks.recv(2048)
                     # print('Modtaget noget fra server:')
-                    self.parent.recv_msg(message)
+                    self.recv_and_sort(message)
+
+
+    # def recv_and_sort(self, message, conn):
+    def recv_and_sort(self, message):
+        packet = str(message.decode('utf8'))
+        list = packet.split(sep)
+        print("Transmission Received... Sorting")
+
+        if list[0] == '1':
+            print("Incomming Message")
+            user_alias = list[1]
+            group_id = list[2]
+            text = list[3]
+            timestamp = list[4]
+            packet = f"\n{user_alias} - {timestamp}\n  {text}"
+            print(packet)
+            if self.parent:
+                self.parent.recv_msg(packet)
+
+        elif list[0] == '2':
+            pass
+        elif list[0] == '3':
+            pass
+        elif list[0] == '4':
+            pass
+        elif list[0] == '5':
+            pass
+        elif list[0] == '6':
+            pass
+        elif list[0] == '7':
+            pass
 
 
     def create_group(self):
@@ -152,7 +183,7 @@ class ChatManager:
             json.dump(info, file)
     
     def build_frame(self, payload, user_id, group_id):
-        Header = "0"+"|"+str(user_id)+"|"+str(group_id)+"|"
+        Header = "0" + sep + str(user_id) + sep + str(group_id) + sep
         packet = bytes(Header + payload, 'utf-8')
         return packet
 
@@ -175,14 +206,16 @@ class ChatManager:
                 if socks == self.server:
                     message = socks.recv(2048)
                     # print('Modtaget noget fra server:')
-                    print (message.decode('utf-8'))
+                    self.recv_and_sort(message)
+                    # print (message.decode('utf-8'))
 
                 else:
                     payload = sys.stdin.readline()
-                    #Header = "0"+"|"+str(user_id)+"|"+str(group_id)+"|"
+                    #Header = "0" + sep + str(user_id) + sep + str(group_id) + sep
                     #packet = bytes(Header + payload, 'utf-8')
-                    packet = self.build_frame(payload, user_id, group_id)
-                    self.server.send(packet)
+                    self.handle_message(payload, group_id)
+                    # packet = self.build_frame(payload, user_id, group_id)
+                    # self.server.send(packet)
 
         server.close()
 
@@ -194,7 +227,19 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-ip', type=str, required=False)
     parser.add_argument('-port', type=int, required=False)
+    parser.add_argument('-user', type=int, required=False)
+    parser.add_argument('-group', type=int, required=False)
     args = parser.parse_args()
+
+    # takes the IP argument from command prompt as IP address, if any exists
+    IP_address = str(args.ip) if args.ip else "127.0.0.1"
+    # takes Port argument from command prompt as port number, if any exists
+    Port = int(args.port) if args.port else 9000
+
+    user_id = str(args.user) if args.user else user_id
+    group_id = str(args.group) if args.group else group_id
+
+
     # Initiate Objects
     cm = ChatManager(args.ip, args.port)
     # gui = GUI.HomeScreen("Nisse")

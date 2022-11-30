@@ -6,10 +6,9 @@ from _thread import *
 import argparse
 from datetime import datetime
 from Database import *
-# import Database
 
-# sep = chr(31)
-sep = "|"
+sep = chr(31)
+# sep = "|"
 
 db = Database()
 
@@ -17,8 +16,6 @@ class ChatManager:
 
 
     def __init__(self, ip, port, parent=None):
-
-        # db.fetch('user')
 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -59,11 +56,11 @@ class ChatManager:
         current = 0
         print(f"\nIn Handle Message\nFetched data is:")
         for i, member in enumerate(group):
-            # print(f"{member}")
-            print(f"Member ID is: {member['user_id']}")
-            print(f"Member Alias is: {member['alias']}")
+            print(f"{member}")
+            # print(f"Member ID is: {member['user_id']}")
+            # print(f"Member Alias is: {member['alias']}")
             if str(member['user_id']) == str(user_id):
-                print("User found")
+                # print("User found")
                 current = i
             else:
                 group_ips.append(member['ip'])

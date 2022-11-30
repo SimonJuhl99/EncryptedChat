@@ -71,7 +71,7 @@ class HomeScreen(tk.Tk):
         self.mylist.bind("<<ListboxSelect>>",self.trigger) #binding mylist widget to the trigger event
 
     def recv_msg(self,data):
-        print(data.decode('utf-8'))
+        # print(data.decode('utf-8'))
         decoded_data = data.decode('utf-8')
         self.chat_window.config(state=NORMAL)
         self.chat_window.insert(INSERT, '%s\n' % decoded_data)
@@ -84,7 +84,7 @@ class HomeScreen(tk.Tk):
         self.chat_window.insert(INSERT, '%s\n' % my_message)
         self.chat_window.config(state=DISABLED)
         self.input_user.set('')
-        self.cm.handle_message(input_get, usr.get_alias(), self.active_group)
+        self.cm.handle_message(input_get, self.active_group)
         return "break"
 
 
@@ -125,6 +125,10 @@ if __name__=="__main__":
 
     chat_window = HomeScreen("Secret Service")
     #cm = ChatManager.ChatManager(args.ip,args.port,self)
-    usr = User.User(10224892379847824, "Løg", "hej1234")
+    usr = User.User(1, "Bamse", "hej1234")
+    # usr = User.User(2, "Yusef", "asdgr")
+    # usr = User.User(3, "Chris", "aasfgasgr")
+    # usr = User.User(4, "Sims", "aasasfdsfsagr")
+    # usr = User.User(5, "Appelsin", "fqefwaaagr")
     chat_window.cm.start_thread()
     chat_window.mainloop()
