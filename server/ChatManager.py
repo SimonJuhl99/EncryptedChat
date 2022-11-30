@@ -5,78 +5,131 @@ import sys
 from _thread import *
 import argparse
 from datetime import datetime
+from Database import *
+# import Database
 
 # sep = chr(31)
-sep = "chr(31)"
+sep = "|"
+
+db = Database()
 
 class ChatManager:
-    # Argument Parsing Setup
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-ip', type=str, required=False)
-    parser.add_argument('-port', type=int, required=False)
-    args = parser.parse_args()
-
-    """The first argument AF_INET is the address domain of the
-    socket. This is used when we have an Internet Domain with
-    any two hosts The second argument is the type of socket.
-    SOCK_STREAM means that data or characters are read in
-    a continuous flow."""
-
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 
-    # takes the IP argument from command prompt as IP address, if any exists
-    IP_address = str(args.ip) if args.ip else "127.0.0.1"
+    def __init__(self, ip, port, parent=None):
 
-    # takes Port argument from command prompt as port number, if any exists
-    Port = int(args.port) if args.port else 9000
+        # db.fetch('user')
 
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    print(f"Readied IP is: {IP_address}")
-    print(f"Readied Port is: {Port}")
+        self.server.bind((ip, port))
+        self.server.listen(100)
+        self.list_of_clients = []
 
-    """
-    binds the server to an entered IP address and at the
-    specified port number.
-    The client must be aware of these parameters
-    """
-    server.bind((IP_address, Port))
-
-    """
-    listens for 100 active connections. This number can be
-    increased as per convenience.
-    """
-    server.listen(100)
-
-    print("Server started.")
-    print(f"Server IP is: {IP_address}")
-    print(f"Server Port is: {Port}")
+        print("Server started.")
+        print(f"Server IP is: {IP_address}")
+        print(f"Server Port is: {Port}")
 
 
-    list_of_clients = []
 
-    def handle_incoming_msg(self, conn, alias, group_id, payload):
+
+    def handle_incoming_msg(self, conn, user_id, group_id, payload):
 
         dt = datetime.now()             # time - human format
         ts = datetime.timestamp(dt)     # time - computer format
+        time = dt.strftime("%d/%m-%y %H:%M:%S")
 
-        # !!!!!!!!!! log to database
+        params = {
+            'text': payload, 
+            'user_id': user_id, 
+            'group_id': group_id, 
+            'timestamp': time
+        }
+        db.insert('message', params)
+        # db_config = {
+        #     'where': {'id': user_id},
+        #     'select': 'alias, ip',
+        #     }
+        # user = db.fetch('user', db_config)
+        group = db.fetch_group_members(group_id)
 
-        Header = "1"+"|"+str(alias)+"|"+str(group_id)+"|"
-        packet = bytes(Header + payload, 'utf-8')
-        self.broadcast(packet, conn)
+        # print(group)
+        group_ips = []
+        current = 0
+        print(f"\nIn Handle Message\nFetched data is:")
+        for i, member in enumerate(group):
+            # print(f"{member}")
+            print(f"Member ID is: {member['user_id']}")
+            print(f"Member Alias is: {member['alias']}")
+            if str(member['user_id']) == str(user_id):
+                print("User found")
+                current = i
+            else:
+                group_ips.append(member['ip'])
+
+        print(group_ips)
+        alias = group[current]['alias']
+        print(f"Alias is set to: {alias}")
+        group.pop(current)
+
+        print(f"\nIn Handle Message\nFetched data is now:")
+        for i, member in enumerate(group):
+            print(f"Index {i} is: {member}")
+
+
+        # print("CM 49: Efter DB Insert")
+        # print(user[0]['alias'])
+        print("Before Frame Generation")
+        frame = "1" + sep + alias + sep + str(group_id) + sep + payload + sep + str(time)
+        print("After Frame Generation")
+        # print("CM 51: Efter Frame-creation")
+        packet = bytes(frame, 'utf-8')
+        # print("CM 51: Efter Frame-2-bytes")
+        print(f"Broadcast frame is: {packet}")
+        self.broadcast(packet, conn, group_ips)
+
+
+    """Using the below function, we broadcast the message to all
+    clients who's object is not the same as the one sending
+    the message """
+    def broadcast(self, message, connection, group_ips):
+        print("Inside Broadcast")
+        print("Clients to send to: ")
+        print(len(self.list_of_clients))
+        print(f"Separator from Broadcast is: {sep}")
+
+
+        for client in self.list_of_clients:		# For everyone in the chat
+            current_ip = client.getpeername()[0]
+            # print(current_ip)
+            # if current_ip in group_ips:
+            #     print("Den er der!... første gang")
+
+
+            # if client != connection and current_ip in group_ips:			# Unless it's the sender themself
+            if current_ip in group_ips:			# Unless it's the sender themself
+                # dir(client)
+                # print(f'Message sent to client {client}')
+                try:
+                    client.send(message)
+                except:
+                    print("Didn't send to client " + client)
+                    client.close()
+
+                    # if the link is broken, we remove the client
+                    self.remove(client)
 
 
     def recv_and_sort(self, message, conn):
         packet = str(message.decode('utf8'))
-        list = packet.split("|")
+        list = packet.split(sep)
 
         if list[0] == '0':
-            alias = list[1]
+            user_id = list[1]
             group_id = list[2]
             payload = list[3]
-            self.handle_incoming_msg(conn, alias, group_id, payload)
+            self.handle_incoming_msg(conn, user_id, group_id, payload)
 
         elif list[0] == '2':
             pass
@@ -100,14 +153,14 @@ class ChatManager:
                 try:
                     message = conn.recv(2048)
                     if message:
-                        print("Received message from client")
+                        print("\nReceived message from client")
                         """prints the message and address of the
                         user who just sent the message on the server
                         terminal"""
                         print ("<" + addr[0] + "> " + message.decode('utf-8'))
 
                         # packet= str(message.decode('utf-8'))
-                        # list = packet.split("|")
+                        # list = packet.split(sep)
 
                         self.recv_and_sort(message, conn)
 
@@ -130,30 +183,6 @@ class ChatManager:
                     continue
 
 
-
-    """Using the below function, we broadcast the message to all
-    clients who's object is not the same as the one sending
-    the message """
-    def broadcast(self, message, connection):
-        print("Clients to send to: ")
-        print(len(self.list_of_clients))
-        print(f"Separator from Broadcast is: {sep}")
-
-
-        for clients in self.list_of_clients:		# For everyone in the chat
-            if clients != connection:			# Unless it's the sender themself
-                dir(clients)
-                # print(f'Message sent to client {clients}')
-                try:
-                    clients.send(message)
-                except:
-                    print("Didn't send to client " + clients)
-                    clients.close()
-
-                    # if the link is broken, we remove the client
-                    self.remove(clients)
-
-        print(f"Separator from Broadcast is: {sep}")
 
 
     """The following function simply removes the object
@@ -189,5 +218,23 @@ class ChatManager:
 
 
 if __name__ == "__main__":
-    cm = ChatManager()
+    #################################
+    #  -- Argument Parsing Setup
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-ip', type=str, required=False)
+    parser.add_argument('-port', type=int, required=False)
+    args = parser.parse_args()
+    # takes the IP argument from command prompt as IP address, if any exists
+    IP_address = str(args.ip) if args.ip else "127.0.0.1"
+
+    # takes Port argument from command prompt as port number, if any exists
+    Port = int(args.port) if args.port else 9000
+
+    print(f"Readied IP is: {IP_address}")
+    print(f"Readied Port is: {Port}")
+
+
+    ###########################
+    #  --  Main Program  -- 
+    cm = ChatManager(IP_address, Port)
     cm.listener()

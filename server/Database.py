@@ -5,14 +5,10 @@ import subprocess
 class Database():
 
     def __init__(self):
-        # con = sqlite3.connect("database.db")    # Create connection to DB file
-        # con = sqlite3.connect("database.db", detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)    # Create connection to DB file
+
         self.con = sqlite3.connect("database.db", detect_types=sqlite3.PARSE_COLNAMES | sqlite3.PARSE_DECLTYPES)    # Create connection to DB file
-        # con.row_factory = sqlite3.Row
-        self.con.row_factory = self.dict_factory
-        self.db = self.con.cursor()                        # Create a cursor in the DB
-        # self.db.mode("line")
-        # subprocess.call(["sqlite3", "database.db", ".mode line"])
+        self.con.row_factory = self.dict_factory    # Make dictionaries instead of lists
+        self.cur = self.con.cursor()        # Create a cursor in the DB
 
 
     #  --  Function to create dictionary instead of list for fetched data
@@ -23,16 +19,20 @@ class Database():
         return d
 
 
+
 ##########################################
 ##  --  Fetch Area --
 ############
 
-
     ######################################
     #  --  General fetch function  --
     def fetch(self, table, setup = None):
-        # print(table)
         # print(setup)
+
+        self.con = sqlite3.connect("database.db", detect_types=sqlite3.PARSE_COLNAMES | sqlite3.PARSE_DECLTYPES)    # Create connection to DB file
+        self.con.row_factory = self.dict_factory
+        self.cur = self.con.cursor()
+
 
         # Default fetch config
         config = {'select': '*', 
@@ -47,7 +47,7 @@ class Database():
 
         sql = f"""
             SELECT {config['select']} 
-            FROM {table}"""
+            FROM '{table}'"""
 
         if config['join']:
             keys = list(config['join'].keys())
@@ -72,10 +72,12 @@ class Database():
                 sql += f"""{key}={config['where'][key]}"""
 
 
-        print(f"\nSQL Statement is:{sql}\n\n")
-        self.db.execute(sql)
-        rows = self.db.fetchall()
-        # rows = self.db.fetchone()
+        # print(f"\nSQL Statement is:{sql}\n\n")
+        self.cur.execute(sql)
+        # print("Efter Execute")
+        rows = self.cur.fetchall()
+        # print("Efter Fetch All")
+        # rows = self.cur.fetchone()
 
 
     ####################################
@@ -85,21 +87,24 @@ class Database():
         for row in rows:
             print(f"{row}")
 
+        return rows
+
 
     # Function to fetch group members
     def fetch_group_members(self, group_id):
-        print("Group fetching")
+        # print("Group fetching")
         db_config = {'where': {'group_member.group_id': group_id},
-            'select': 'group_member.admin, user.alias',
+            'select': 'group_member.user_id, group_member.admin, user.alias, user.ip',
             'join':{'user': 'group_member.user_id=user.id'}
             }
         
-        self.fetch('group_member', db_config)
+        return self.fetch('group_member', db_config)
+
 
     # Fetch your own user info
     def fetch_own_key(self, user_id):
         db_config = {'where':{'id': user_id}}
-        self.fetch('user', db_config)
+        return self.fetch('user', db_config)
 
 
 
@@ -108,10 +113,14 @@ class Database():
 ##  --  Insert Area --
 ############
 
-
     ######################################
     #  --  General fetch function  --
     def insert(self, table, params):
+
+        self.con = sqlite3.connect("database.db", detect_types=sqlite3.PARSE_COLNAMES | sqlite3.PARSE_DECLTYPES)    # Create connection to DB file
+        self.con.row_factory = self.dict_factory
+        self.cur = self.con.cursor()
+
 
         sql = f"""
             INSERT INTO {table}
@@ -134,20 +143,19 @@ class Database():
             VALUES ({sql_end})"""
 
 
-        print(f"\nSQL Statement is:{sql}\n\n")
-        self.db.execute(sql)
+        # print(f"\nSQL Statement is:{sql}\n\n")
+        self.cur.execute(sql)
         self.con.commit()
 
+        print(f"Last Inserted Row is: {self.cur.lastrowid}")
 
-        print(f"Last Inserted Row is: {self.db.lastrowid}")
-
-        return self.db.lastrowid
+        return self.cur.lastrowid
 
 
     # Method to log messages to database
     def insert_msg(self, text, user_id, group_id):
         params = {'text': text, 'user_id': user_id, 'group_id': group_id}
-        db.insert('message', params)
+        return self.insert('message', params)
 
 
 
