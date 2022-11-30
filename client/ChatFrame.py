@@ -2,8 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 
 class ChatFrame(ttk.Frame):
-    def __init__(self, container):
+    def __init__(self, container, cmRoot):
         super().__init__(container)
+        self.cm = cmRoot
         
         # Grid layout setup
         self.columnconfigure(0, weight=1)
@@ -61,6 +62,7 @@ class ChatFrame(ttk.Frame):
         self.chat.insert(tk.INSERT, 'Me: %s\n' % msgInput)
         self.chat.config(state=tk.DISABLED)
         self.userInput.set('')
+        self.cm.hello()
 
     def changeGroup(self, event):
         selection = event.widget.curselection()

@@ -1,11 +1,13 @@
 import tkinter as tk
-from ChatFrame import *
 
+from ChatFrame import ChatFrame
+import ChatManager
 
 class MainFrame(tk.Tk):
-    def __init__(self):
+    def __init__(self, cmRoot):
         """Initialize root window"""
         super().__init__()
+        self.cm = cmRoot
 
         # Window configuration
         self.geometry("1000x550")
@@ -14,11 +16,11 @@ class MainFrame(tk.Tk):
         self.state("normal")
 
         self.__crate_widgets()
-
+        
 
 
     def __crate_widgets(self):
-        chat_window = ChatFrame(self)
+        chat_window = ChatFrame(self, self.cm)
         chat_window.grid(column=0, row=0)
 
         
