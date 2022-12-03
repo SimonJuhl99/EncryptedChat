@@ -15,13 +15,13 @@ class MainFrame(tk.Tk):
         self.title("EncryptedChat")
         self.state("normal")
 
-        self.__crate_widgets()
+        self.__create_widgets()
         
 
 
-    def __crate_widgets(self):
-        chat_window = ChatFrame(self, self.cm)
-        chat_window.grid(column=0, row=0)
+    def __create_widgets(self):
+        self.chat_window = ChatFrame(self, self.cm)
+        self.chat_window.grid(column=0, row=0)
 
         
 if __name__ == '__main__':

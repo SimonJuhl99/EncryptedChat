@@ -5,7 +5,7 @@ class ChatFrame(ttk.Frame):
     def __init__(self, container, cmRoot):
         super().__init__(container)
         self.cm = cmRoot
-        
+        #self.cm.start_thread()
         # Grid layout setup
         self.columnconfigure(0, weight=1)
 
@@ -56,6 +56,8 @@ class ChatFrame(ttk.Frame):
         self.inputField.bind("<Return>", self.sendMsg)
         self.groupList.bind("<<ListboxSelect>>", self.changeGroup)
 
+        #self.cm.start_thread()
+
     def sendMsg(self, event):
         msgInput = self.inputField.get()
         self.chat.config(state=tk.NORMAL)
@@ -104,3 +106,10 @@ class ChatFrame(ttk.Frame):
         
     def advanced_options(self):
         pass
+
+
+    def recv_msg(self):
+        pass
+
+    def dummy(self):
+        print("Dummy works")
