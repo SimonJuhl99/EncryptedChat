@@ -126,7 +126,7 @@ class Database():
 
 
         sql = f"""
-            INSERT INTO {table}
+            INSERT INTO '{table}'
             ("""
 
         sql_end = ""
