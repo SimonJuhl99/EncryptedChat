@@ -146,11 +146,11 @@ class Database():
             VALUES ({sql_end})"""
 
 
-        # print(f"\nSQL Statement is:{sql}\n\n")
+        print(f"\nSQL Statement is:{sql}\n\n")
         self.cur.execute(sql)
         self.con.commit()
 
-        print(f"Inserted at row in {table} table: {self.cur.lastrowid}")
+        # print(f"Inserted at row in {table} table: {self.cur.lastrowid}")
 
         return self.cur.lastrowid
 
@@ -173,6 +173,8 @@ if __name__ == "__main__":
 
 
     # Insert Testing
-    db.insert('message', {'text': 'ting er grimme', 'user_id': 2, 'group_id': 1})
+    # db.insert('message', {'text': 'ting er grimme', 'user_id': 2, 'group_id': 1})
 
-    db.insert_msg('næste besked', 1, 2)
+    db.insert_msg('Hvorfor virker det ikke?', 1, 2)
+
+    # db.insert('group', {'name': 'Nissefisk'})

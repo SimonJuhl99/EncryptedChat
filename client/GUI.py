@@ -4,10 +4,12 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import *
+import re
 import argparse
 import ChatManager
 import User
 
+# group_ip = 1
 
 class GroupName():
     def __init__(self, group_name):
@@ -17,8 +19,9 @@ class GroupName():
 class HomeScreen(tk.Tk):
     def __init__(self, group_name):
         super().__init__()
-        self.cm = ChatManager.ChatManager(args.ip,args.port,self)
-        self.active_group = None
+        print(usr.user_id)
+        self.cm = ChatManager.ChatManager(args.ip,args.port, usr.user_id,self)
+        self.active_group = 1
         self.geometry("1000x550")
         self.resizable(0,0)
         self.group = GroupName(group_name)
@@ -47,13 +50,13 @@ class HomeScreen(tk.Tk):
         self.mylist = Listbox(self,yscrollcommand=self.scrollbar.set)
 
         for line in range(1,101):
-            self.mylist.insert(END,"Group"+ str(line))
+            self.mylist.insert(END,"Group "+ str(line))
 
-        first_list_item_tuple = self.mylist.get(0, 0)                   # we retrieve the first element of the ListBox "mylist"
-        for first_list_item in first_list_item_tuple:
-            first_group_name = first_list_item.split(" ")[0]            # we retrieve the groupname from that element
+        # first_list_item_tuple = self.mylist.get(0, 0)                   # we retrieve the first element of the ListBox "mylist"
+        # for first_list_item in first_list_item_tuple:
+        #     first_group_name = first_list_item.split(" ")[0]            # we retrieve the groupname from that element
 
-        self.set_active_group(first_group_name)
+        # self.set_active_group(first_group_name)
         self.mylist.grid(row=1,column=0,ipady=50,sticky=tk.NW)
         self.scrollbar.config(command=self.mylist.yview)
 
@@ -72,17 +75,18 @@ class HomeScreen(tk.Tk):
 
     def recv_msg(self,data):
         # print(data.decode('utf-8'))
-        decoded_data = data.decode('utf-8')
+        # decoded_data = data.decode('utf-8')
         self.chat_window.config(state=NORMAL)
-        self.chat_window.insert(INSERT, '%s\n' % decoded_data)
+        # self.chat_window.insert(INSERT, '%s\n' % decoded_data)
+        self.chat_window.insert(INSERT, '%s\n' % data)
         self.chat_window.config(state=DISABLED)
 
     def send_msg(self, event):
         input_get = self.input_entry.get()
-        my_message = "Me: " + input_get
-        self.chat_window.config(state=NORMAL)
-        self.chat_window.insert(INSERT, '%s\n' % my_message)
-        self.chat_window.config(state=DISABLED)
+        # my_message = "Me: " + input_get
+        # self.chat_window.config(state=NORMAL)
+        # self.chat_window.insert(INSERT, '%s\n' % my_message)
+        # self.chat_window.config(state=DISABLED)
         self.input_user.set('')
         self.cm.handle_message(input_get, self.active_group)
         return "break"
@@ -107,6 +111,10 @@ class HomeScreen(tk.Tk):
         self.name() #doesn't work but needs to be there
 
     def set_active_group(self, group_id):
+        print(group_id)
+        group_id = re.findall(r'\d+', group_id)[0]
+        ['42', '32', '30']
+        print("After extraction: " + group_id)
         self.active_group = group_id
 
 
@@ -123,12 +131,16 @@ if __name__=="__main__":
     args = parser.parse_args()
 
 
-    chat_window = HomeScreen("Secret Service")
-    #cm = ChatManager.ChatManager(args.ip,args.port,self)
-    usr = User.User(1, "Bamse", "hej1234")
+    # usr = User.User(1, "Bamse", "hej1234")
     # usr = User.User(2, "Yusef", "asdgr")
     # usr = User.User(3, "Chris", "aasfgasgr")
-    # usr = User.User(4, "Sims", "aasasfdsfsagr")
-    # usr = User.User(5, "Appelsin", "fqefwaaagr")
+    usr = User.User(4, "Sims", "aasasfdsfsagr")
+    # usr = User.User(5, "Appelsin", "fqefwaaagr")       # Ikke med i gruppe 1!!
+
+    print(usr.alias)
+
+    #  --  Start Client and GUI  --
+    chat_window = HomeScreen("Secret Service")
+    #cm = ChatManager.ChatManager(args.ip,args.port,self)
     chat_window.cm.start_thread()
     chat_window.mainloop()

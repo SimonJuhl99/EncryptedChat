@@ -47,14 +47,14 @@ class ChatManager:
         }
         # print("DB Params Done")
         db.insert('message', params)
-        # print("DB Logging Done")
+        print("DB Logging Done")
         # db_config = {
         #     'where': {'id': user_id},
         #     'select': 'alias, ip',
         #     }
         # user = db.fetch('user', db_config)
         group = db.fetch_group_members(group_id)
-        # print("DB Group-fetching Done")
+        print("DB Group-fetching Done")
 
         # print(group)
         group_ips = []
@@ -85,7 +85,7 @@ class ChatManager:
         # print(user[0]['alias'])
         # print("Before Frame Generation")
         frame = "1" + sep + alias + sep + str(group_id) + sep + payload + sep + str(time)
-        # print("After Frame Generation")
+        print("After Frame Generation")
         # print("CM 51: Efter Frame-creation")
         packet = bytes(frame, 'utf-8')
         # print("CM 51: Efter Frame-2-bytes")
@@ -97,8 +97,8 @@ class ChatManager:
     clients who's object is not the same as the one sending
     the message """
     def broadcast(self, message, connection, group_ips):
-        # print("Inside Broadcast")
-        print(f"{len(group_ips)} Groupmembers to send to.")
+        print("Inside Broadcast")
+        print(f"{len(group_ips)} Groupmembers Registered in Group.")
         # print(len(group_ips))
 
         count = 0
@@ -122,7 +122,9 @@ class ChatManager:
 
                     # if the link is broken, we remove the client
                     self.remove(client)
-            print(f"{count} Groupmembers were online.")
+
+        print(f"{count} Groupmembers Were Online to Receive Message.")
+
 
 
     def recv_and_sort(self, message, conn):
@@ -134,7 +136,7 @@ class ChatManager:
         # print(list)
 
         if list[0] == '0':
-            print("Handling Incoming Message")
+            print("Handling Incoming Chat Message")
             user_id = list[1]
             group_id = list[2]
             payload = list[3]
@@ -162,7 +164,7 @@ class ChatManager:
                 try:
                     message = conn.recv(2048)
                     if message:
-                        print("\nReceived message from client")
+                        print("\n______________________\n - Received message from client\n________")
                         """prints the message and address of the
                         user who just sent the message on the server
                         terminal"""
@@ -216,7 +218,7 @@ class ChatManager:
             self.list_of_clients.append(self.conn)
 
             # prints the address of the user that just connected
-            print (addr[0] + " connected")
+            print ("Client connected from IP:" + addr[0])
 
             # creates and individual thread for every user
             # that connects

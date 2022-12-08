@@ -14,14 +14,17 @@ import GUI
 
 sep = chr(31)
 # sep = "|"
-user_id = 2
+default_user = 2
 group_id = 1
+
+LINE_UP = '\033[1A'     # For deleting own input in terminal
+LINE_CLEAR = '\x1b[2K'  # For deleting own input in terminal
 
 
 
 class ChatManager:
 
-    def __init__(self,ip,port,parent=None):
+    def __init__(self,ip,port, user_id, parent=None):
 
         self.parent = parent
         self.IP_address = str(ip) if ip else "127.0.0.1"
@@ -29,6 +32,9 @@ class ChatManager:
 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.connect((self.IP_address, self.Port))
+
+        self.user_id = user_id
+
 
     def start_thread(self):
         new_thread = threading.Thread(name="ChatManager Thread", target=self.recv, args=())
@@ -41,13 +47,13 @@ class ChatManager:
         pass
 
     def handle_message(self, payload, group_id):
-        packet = self.build_frame(payload, user_id, group_id)
+        packet = self.build_frame(payload, group_id)
         self.server.send(packet)
 
         pass
 
-    def build_frame(self, payload, user_id, group_id):
-        Header = "0" + sep + str(user_id) + sep + str(group_id) + sep
+    def build_frame(self, payload, group_id):
+        Header = "0" + sep + str(self.user_id) + sep + str(group_id) + sep
         packet = bytes(Header + payload, 'utf-8')
         return packet
 
@@ -76,18 +82,22 @@ class ChatManager:
     def recv_and_sort(self, message):
         packet = str(message.decode('utf8'))
         list = packet.split(sep)
-        print("Transmission Received... Sorting")
+        # print("Transmission Received... Sorting")
 
         if list[0] == '1':
-            print("Incomming Message")
+            # print("Incomming Message")
             user_alias = list[1]
             group_id = list[2]
             text = list[3]
             timestamp = list[4]
             packet = f"\n{user_alias} - {timestamp}\n  {text}"
-            print(packet)
             if self.parent:
                 self.parent.recv_msg(packet)
+            else:
+                if self.own_message == True:
+                    print(LINE_UP, end=LINE_CLEAR)
+                print(packet)
+
 
         elif list[0] == '2':
             pass
@@ -215,6 +225,8 @@ class ChatManager:
                     payload = sys.stdin.readline()
                     #Header = "0" + sep + str(user_id) + sep + str(group_id) + sep
                     #packet = bytes(Header + payload, 'utf-8')
+                    payload = payload.rstrip("\n")
+                    self.own_message = True
                     self.handle_message(payload, group_id)
                     # packet = self.build_frame(payload, user_id, group_id)
                     # self.server.send(packet)
@@ -238,12 +250,12 @@ if __name__ == "__main__":
     # takes Port argument from command prompt as port number, if any exists
     Port = int(args.port) if args.port else 9000
 
-    user_id = str(args.user) if args.user else user_id
+    user_id = str(args.user) if args.user else default_id
     group_id = str(args.group) if args.group else group_id
 
 
     # Initiate Objects
-    cm = ChatManager(args.ip, args.port)
+    cm = ChatManager(args.ip, args.port, user_id)
     # gui = GUI.HomeScreen("Nisse")
 
     # thread = threading.Thread(name="GUI Thread", target=gui.mainloop(), args=())
